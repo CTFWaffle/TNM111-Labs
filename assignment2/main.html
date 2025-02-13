@@ -3,28 +3,12 @@
 
 <head>
     <title>Page Title</title>
-    <canvas id=canvas width=500 height=500></canvas>
+    <svg id=svg width=500 height=500></svg>
+    <svg id=categories width=500 height=500></svg>
 </head>
 
 <body>
     <script src="script.js"></script>
-    <pre id="output"></pre>
-    <script>
-        document.getElementById('data1.csv').addEventListener('change', function (event) {
-            const file = event.target.files[0];
-            if (file) {
-                Papa.parse(file, {
-                    header: true,
-                    complete: function (results) {
-                        document.getElementById('output').innerText = JSON.stringify(results.data, null, 2);
-                    },
-                    error: function (error) {
-                        console.error('Error parsing CSV:', error);
-                    }
-                });
-            }
-        });
-    </script>
 </body>
 
 </html>
