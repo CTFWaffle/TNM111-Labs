@@ -1,1 +1,31 @@
-{\rtf1}
+body{
+    display:grid;
+    grid-template-areas:
+    "content content"
+    "episode range";
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    grid-gap: 10px;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f0f0;
+}
+body > div.content{
+    grid-area:content;
+}
+filter_container{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    width:50%;
+}
+body > div.range_container{
+    grid-area:range;
+}
+body > div.episodeBoxes {
+    grid-area:episode;
+}
+.episodeBoxes label{
+    display: block;
+    padding: 1%;
+
+}

@@ -1,6 +1,6 @@
 .range_container {
-    display: grid;
-    /*flex-direction: right;*/
+    display: block;
+    flex-direction: right;
     width: 40%;
     margin: 35% auto;
   }
