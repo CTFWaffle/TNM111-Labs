@@ -5,11 +5,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>StarWars Interacitions</title>
         <link rel="stylesheet" type="text/css" href="css/slider.css">
-        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <link rel="stylesheet" type="text/css" href="css/style.css">        
         <script src="https://d3js.org/d3.v7.min.js"></script>
 
     </head>
-    <body>        
+    <body>      
+        <!-- This example is from d3indepth.com -->
+        <div id="content">
+            <svg width="700" height="400">
+            <g transform="translate(50, 200)"></g>
+            </svg>
+        </div>
+  
+        
+
         <div class="range_container">
             <div class="sliders_control">
                 <input id="fromSlider" type="range" value="2" min="1" max="7"/>
@@ -27,5 +36,6 @@
             </div>
         </div>
         <script src="js/coolSlider.js"></script>
+        <script type="module" src="js/script.js"></script>
     </body>
 </html>
