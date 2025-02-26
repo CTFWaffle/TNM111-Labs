@@ -7,6 +7,8 @@ import { drag } from 'https://esm.sh/d3-drag';
 const svg = d3.select("content-svg1");
 const tooltip = d3.select("#tooltip");
 
+let scale = 5;
+
 fetch('./starwars-interactions/starwars-full-interactions-allCharacters.json')
 .then(response => response.json())
 .then(jsonData => {
@@ -53,7 +55,7 @@ fetch('./starwars-interactions/starwars-full-interactions-allCharacters.json')
 				  .style("opacity", 1)
 				  .html(`<strong>${d.source.name} - ${d.target.name}</strong><br/>Number of scenes together: ${d.value}`);
 		  
-				  d3.select(this).attr("stroke-width", linkScale(d.value) + 0.5);
+				  d3.select(this).attr("stroke-width", linkScale(d.value) * scale);
 				  d3.select(this).attr("stroke", "red");
 			})
 			.on("mouseout", function(event, d) {
@@ -84,12 +86,12 @@ fetch('./starwars-interactions/starwars-full-interactions-allCharacters.json')
 				  .style("opacity", 1)
 				  .html(`<strong>${d.name}</strong><br/>Number of scenes: ${d.value}`);
 		  
-				d3.select(this).attr("stroke", "black",3);
+				d3.select(this).attr("stroke", "red",3);
 				link.filter(function(l) {
 					return l.source === d || l.target === d;
 				}).attr("stroke", "red")
 				.attr("stroke-width", function(l) {
-					return linkScale(l.value) * 5;
+					return linkScale(l.value) * scale;
 				});
 			})
 			.on("mouseout", function(event, d) {
