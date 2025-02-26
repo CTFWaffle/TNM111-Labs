@@ -4,7 +4,7 @@ import { forceSimulation, forceManyBody, forceX, forceCollide, forceCenter, forc
 import { range } from 'https://esm.sh/d3-array';
 import { drag } from 'https://esm.sh/d3-drag';
 
-const svg = d3.select("#content-svg");
+const svg = d3.select("content-svg1");
 const tooltip = d3.select("#tooltip");
 
 fetch('./starwars-interactions/starwars-full-interactions-allCharacters.json')
@@ -23,13 +23,17 @@ fetch('./starwars-interactions/starwars-full-interactions-allCharacters.json')
 		.domain(d3.extent(links, function (d) { return d.value }))
 		.range([.25, 1.25])
 
+	// Get the dimensions of the content div
+	const contentDiv = document.getElementById("content1");
+	const { width, height } = contentDiv.getBoundingClientRect();
+
 	let simulation = forceSimulation(nodes)
 		.force("link", d3.forceLink(links))
 		.force('charge', forceManyBody().strength(5))
 		.force('collision', forceCollide().radius(function(d) {
 			return nodeScale(d.value) * 3;
 		}))
-		.force('center', forceCenter(350, 20)) // TODO: should depend on width and height 
+		.force('center', forceCenter(width/3, height/4)) // Force center is always center of the content div 
 		.on('tick', ticked);
 
 	function ticked() {
@@ -80,11 +84,20 @@ fetch('./starwars-interactions/starwars-full-interactions-allCharacters.json')
 				  .style("opacity", 1)
 				  .html(`<strong>${d.name}</strong><br/>Number of scenes: ${d.value}`);
 		  
-				d3.select(this).attr("stroke", "black");
+				d3.select(this).attr("stroke", "black",3);
+				link.filter(function(l) {
+					return l.source === d || l.target === d;
+				}).attr("stroke", "red")
+				.attr("stroke-width", function(l) {
+					return linkScale(l.value) * 5;
+				});
 			})
 			.on("mouseout", function(event, d) {
 				tooltip.style("opacity", 0);
-		  
+				link.attr("stroke", "black")
+				.attr("stroke-width", function(l) {
+					return linkScale(l.value);
+				});
 				d3.select(this).attr("stroke", null);
 			})
 			.call(drag(simulation)

@@ -1,31 +1,58 @@
-body{
-    display:grid;
-    grid-template-areas:
-    "content content"
-    "episode range";
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
-    grid-gap: 10px;
+body {
     font-family: 'Roboto', sans-serif;
     background-color: #f0f0f0;
 }
-body > div.content{
-    grid-area:content;
+.content {
+    display: flex;
+    width: 100%;
+    height: 50vw;
+    align-items: column;
 }
-filter_container{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
+
+#content-svg1 {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#content-svg2 {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #f0f0f0;
+    border: 1px solid black;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 2vw;
+    font-family: 'Roboto', sans-serif;
+}
+
+.filtering_container {
+    display:flex;
+    justify-content: row;
+    align-items: center;
+    width: 100%;
+}
+.range_container{
+    width:50%;
+    margin:0px;
+    padding-right:5%;
+    padding-left:5%;
+}
+
+.episodeBoxes {
+    display:flex;
+    align-items: column;
     width:50%;
 }
-body > div.range_container{
-    grid-area:range;
-}
-body > div.episodeBoxes {
-    grid-area:episode;
-}
-.episodeBoxes label{
+
+.episodeBoxes label {
     display: block;
     padding: 1%;
-
 }
