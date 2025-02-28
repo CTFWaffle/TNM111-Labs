@@ -16,22 +16,55 @@ document.addEventListener('DOMContentLoaded', () => {
             .nodes()
             .map(node => parseInt(node.value));
 
-        // Now do something with the updated array of checked values
-        console.log("Checked Values:", checkedValues);
+        let jsonData = {
+            nodes: [],
+            links: []
+        };
+        
+        const fetchPromises = checkedValues.map(episode =>
+            fetch(`./starwars-interactions/starwars-episode-${episode}-interactions-allCharacters.json`)
+                .then(response => response.json())
+                .then(data => {
+                    data.nodes.forEach(n => {
+                        let existingNode = jsonData.nodes.find(node => node.name === n.name);
+                        if (existingNode) {
+                            existingNode.value += n.value; 
+                        } else {
+                            jsonData.nodes.push({ ...n });
+                        }
+                    });
+                    console.log('HERE1');
 
-        fetch('./starwars-interactions/starwars-episode-1-interactions-allCharacters.json')
-        .then(response => response.json())
-        .then(jsonData => {
-            console.log('JSON data:', jsonData);
-            console.log('nodes:', jsonData.nodes);
-
+                    data.links.forEach(l => {
+                        let sourceNode = jsonData.nodes.find(node => node.name === data.nodes[l.source].name);
+                        let targetNode = jsonData.nodes.find(node => node.name === data.nodes[l.target].name);
+        
+                        if (sourceNode && targetNode) {
+                            let existingLink = jsonData.links.find(link =>
+                                (link.source === sourceNode && link.target === targetNode) ||
+                                (link.source === targetNode && link.target === sourceNode)
+                            );
+        
+                            if (existingLink) {
+                                existingLink.value += l.value;
+                            } else {
+                                jsonData.links.push({
+                                    source: sourceNode,
+                                    target: targetNode,
+                                    value: l.value
+                                });
+                            }
+                        }
+                    });
+                })
+        );
+        
+        Promise.all(fetchPromises).then(() => {
             const div = d3.select("#content2");
             const svg = d3.select("#content-svg2");
-
-            // Create all episode visualization
+        
             createGraph(div, svg, jsonData);
-        })
-        .catch(err => {
+        }).catch(err => {
             console.error('Error reading JSON:', err);
         });
     });
@@ -85,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .force('collision', forceCollide().radius(function (d) {
                 return nodeScale(d.value) * 3;
             }))
-            .force('center', forceCenter(width / 3, height / 2)) // Force center is always center of the content div 
+            .force('center', forceCenter(width / 2, height / 2)) // Force center is always center of the content div 
             .on('tick', ticked);
 
         function ticked() {

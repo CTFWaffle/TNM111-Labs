@@ -10,22 +10,8 @@
 
     </head>
     <body>      
-        <!-- This example is from d3indepth.com -->
-        <div class="content">
-            <div class="content" id="content1">
-                <svg id="content-svg1">
-                    <g transform="translate(50, 200)"></g>
-                </svg>
-            </div>
-            <div class="content" id="content2">
-                <svg id="content-svg2">
-                    <g transform="translate(50, 200)"></g>
-                </svg>
-            </div>
-                <div id="tooltip" class="tooltip" style="opacity: 0;"></div>
-        </div>
-        
     <div class="filtering_container">
+        <h3>Filter by Number of Scenes</h3>
         <div class="range_container">
             <div class="sliders_control">
                 <input id="fromSlider" type="range" value="1" min="1" max="7"/>
@@ -33,16 +19,17 @@
             </div>
             <div class="form_control">
                 <div class="form_control_container">
-                    <div class="form_control_container__time">Min</div>
+                    <div class="form_control_container__time" style="font-size: 14px;">Min</div>
                     <input class="form_control_container__time__input" type="number" id="fromInput" value="1" min="1" max="7"/>
                 </div>
                 <div class="form_control_container">
-                    <div class="form_control_container__time">Max</div>
+                    <div class="form_control_container__time" style="font-size: 14px;">Max</div>
                     <input class="form_control_container__time__input" type="number" id="toInput" value="7" min="1" max="7"/>
                 </div>
             </div>
         </div>
-
+        <hr class="divider">
+        <h3>Select Episodes</h3> 
         <div class="episodeBoxes">
             <form>
                 <label for="1"><input type="checkbox" name="" id="1" value=1 class="episode">Episode 1</label>
@@ -54,6 +41,20 @@
                 <label for="7"><input type="checkbox" name="" id="7" value=7 class="episode">Episode 7</label>
             </form>
         </div>
+    </div>
+    <div class="content">
+        <div id="tooltip" class="tooltip" style="opacity: 0;"></div>
+        <div class="content" id="content1">
+            <svg id="content-svg1">
+                <g transform="translate(50, 200)"></g>
+            </svg>
+        </div>
+        <div class="content" id="content2">
+            <svg id="content-svg2">
+                <g transform="translate(50, 200)"></g>
+            </svg>
+        </div>
+            
     </div>
         <script src="js/coolSlider.js"></script>
         <script type="module" src="js/test2.js"></script>
