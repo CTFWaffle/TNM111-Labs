@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .force('collision', forceCollide().radius(function (d) {
                 return nodeScale(d.value) * 3;
             }))
-            .force('center', forceCenter(width / 3, height / 4)) // Force center is always center of the content div 
+            .force('center', forceCenter(width / 3, height / 2)) // Force center is always center of the content div 
             .on('tick', ticked);
 
         function ticked() {
@@ -100,22 +100,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 .attr('x2', d => d.target.x)
                 .attr('y2', d => d.target.y)
                 .attr('class', d => 
-                    d.source.name.replace(/\s+/g, '-') +
-                    d.target.name.replace(/\s+/g, '-')
+                    d.source.name.replace(/[\/\s]+/g, '-') +
+                    d.target.name.replace(/[\/\s]+/g, '-') +
+                    " " +
+                    d.source.name.replace(/[\/\s]+/g, '-') + 'link' + 
+                    " " +
+                    d.target.name.replace(/[\/\s]+/g, '-') + 'link'
                 )
                 .on("mouseover", function (event, d) {
                     tooltip
                         .style("opacity", 1)
                         .html(`<strong>${d.source.name} - ${d.target.name}</strong><br/>Number of scenes together: ${d.value}`);
 
-                    d3.selectAll('.' + d.source.name.replace(/\s+/g, '-') + d.target.name.replace(/\s+/g, '-'))
+                    d3.selectAll('.' + d.source.name.replace(/[\/\s]+/g, '-') + d.target.name.replace(/[\/\s]+/g, '-'))
                         .attr("stroke-width", linkScale(d.value) * scale)
                         .attr("stroke", "red");
                 })
                 .on("mouseout", function (event, d) {
                     tooltip.style("opacity", 0);
 
-                    d3.selectAll('.' + d.source.name.replace(/\s+/g, '-') + d.target.name.replace(/\s+/g, '-'))
+                    d3.selectAll('.' + d.source.name.replace(/[\/\s]+/g, '-') + d.target.name.replace(/[\/\s]+/g, '-'))
                         .attr("stroke-width", linkScale(d.value))
                         .attr("stroke", "black");
                 });
@@ -136,30 +140,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     return d.y;
                 })
                 .attr('class', d => 
-                    d.name.replace(/\s+/g, '-')
+                    d.name.replace(/[\/\s]+/g, '-')
                 )
                 .on("mouseover", function (event, d) {
                     tooltip
                         .style("opacity", 1)
                         .html(`<strong>${d.name}</strong><br/>Number of scenes: ${d.value}`);
 
-                    d3.selectAll('.' + d.name.replace(/\s+/g, '-'))
-                        .attr("stroke", "red", 5);
+                    d3.selectAll('.' + d.name.replace(/[\/\s]+/g, '-'))
+                        .attr("stroke", "red")
+                        .attr("stroke-width", 3);
 
-                    link.filter(function (l) {
-                        return l.source === d || l.target === d;
-                    }).attr("stroke", "red")
-                        .attr("stroke-width", function (l) {
-                            return linkScale(l.value) * scale;
-                        });
+                    d3.selectAll('.' + d.name.replace(/[\/\s]+/g, '-') + 'link')
+                        .attr("stroke-width", l => linkScale(l.value) * scale)
+                        .attr("stroke", "red");
                 })
                 .on("mouseout", function (event, d) {
                     tooltip.style("opacity", 0);
-                    link.attr("stroke", "black")
-                        .attr("stroke-width", function (l) {
-                            return linkScale(l.value);
-                        });
-                        d3.selectAll('.' + d.name.replace(/\s+/g, '-')).attr("stroke", null);
+                    
+                    d3.selectAll('.' + d.name.replace(/[\/\s]+/g, '-')).attr("stroke", null);
+
+                    d3.selectAll('.' + d.name.replace(/[\/\s]+/g, '-') + 'link')
+                        .attr("stroke-width", l => linkScale(l.value))
+                        .attr("stroke", "black");
                 })
                 .call(drag(simulation)
                     .on('start', dragstarted)
