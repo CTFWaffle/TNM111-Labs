@@ -190,6 +190,23 @@ document.addEventListener('DOMContentLoaded', () => {
             .domain(d3.extent(links, function (d) { return d.value }))
             .range([.25, 1.25])
 
+            // Custom force to limit the distance of nodes from the center
+        function forceLimit() {
+            for (let i = 0; i < nodes.length; ++i) {
+                const node = nodes[i];
+                const dx = node.x - width / 2;
+                const dy = node.y - height / 2;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const maxDistance = width/3; // Maximum distance from the center
+
+                if (distance > maxDistance) {
+                    const angle = Math.atan2(dy, dx);
+                    node.x = width / 2 + maxDistance * Math.cos(angle);
+                    node.y = height / 2 + maxDistance * Math.sin(angle);
+                }
+            }
+        }
+
         let simulation = forceSimulation(nodes)
             .force("link", d3.forceLink(links))
             .force('charge', forceManyBody().strength(5))
@@ -197,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return nodeScale(d.value) * 3;
             }))
             .force('center', forceCenter(width / 2, height / 2)) // Force center is always center of the content div 
+            .force('limit', forceLimit) // Limit distance of nodes from the center
             .on('tick', ticked);
 
         function ticked() {
@@ -304,5 +322,16 @@ document.addEventListener('DOMContentLoaded', () => {
             d.fx = null;
             d.fy = null;
         }
+        window.addEventListener('resize', function() {
+            const width = window.innerWidth / 2;
+            const height = window.innerHeight;
+        
+            d3.select('svg')
+                .attr('width', width)
+                .attr('height', height);
+        
+            simulation.force('center', d3.forceCenter(width / 2, height / 2));
+            simulation.alpha(1).restart();
+        });
     }
 });
