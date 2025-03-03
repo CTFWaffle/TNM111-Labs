@@ -5,8 +5,55 @@ import { range } from 'https://esm.sh/d3-array';
 import { drag } from 'https://esm.sh/d3-drag';
 
 document.addEventListener('DOMContentLoaded', () => {
+    const fromSlider = document.getElementById('fromSlider');
+    const toSlider = document.getElementById('toSlider');
+    const fromInput = document.getElementById('fromInput');
+    const toInput = document.getElementById('toInput');
+
+    fromSlider.addEventListener('input', updateLinks);
+    toSlider.addEventListener('input', updateLinks);
+
+    fromInput.addEventListener('input', function () {
+        fromSlider.value = this.value;
+        updateLinks();
+    });
+
+    toInput.addEventListener('input', function () {
+        toSlider.value = this.value;
+        updateLinks();
+    });    
+
+    let minLinkValue;
+    let maxLinkValue;
+
+    fetch('./starwars-interactions/starwars-full-interactions-allCharacters.json')
+        .then(response => response.json())
+        .then(jsonData => {
+            console.log('JSON data:', jsonData);
+            console.log('nodes:', jsonData.nodes);
+
+            minLinkValue = d3.min(jsonData.links, d => d.value);
+            maxLinkValue = d3.max(jsonData.links, d => d.value);
+
+            updateSlider(minLinkValue, maxLinkValue, true, true);
+
+            const div = d3.select("#content1");
+            const svg = d3.select("#content-svg1");
+
+            // Create all episode visualization
+            createGraph(div, svg, jsonData);
+        })
+        .catch(err => {
+            console.error('Error reading JSON:', err);
+        });
+
+    // fromSlider.value = minLinkValue;
+    // toSlider.value = maxLinkValue;
+    // fromInput.value = minLinkValue;
+    // toInput.value = maxLinkValue;
+    
+    
     const episodeBoxes = d3.selectAll('.episode');
-    console.log(episodeBoxes);
 
     episodeBoxes.on("change", function () {
         const checkedValues = episodeBoxes
@@ -20,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nodes: [],
             links: []
         };
-        
+
         const fetchPromises = checkedValues.map(episode =>
             fetch(`./starwars-interactions/starwars-episode-${episode}-interactions-allCharacters.json`)
                 .then(response => response.json())
@@ -28,23 +75,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     data.nodes.forEach(n => {
                         let existingNode = jsonData.nodes.find(node => node.name === n.name);
                         if (existingNode) {
-                            existingNode.value += n.value; 
+                            existingNode.value += n.value;
                         } else {
                             jsonData.nodes.push({ ...n });
                         }
                     });
-                    console.log('HERE1');
 
                     data.links.forEach(l => {
                         let sourceNode = jsonData.nodes.find(node => node.name === data.nodes[l.source].name);
                         let targetNode = jsonData.nodes.find(node => node.name === data.nodes[l.target].name);
-        
+
                         if (sourceNode && targetNode) {
                             let existingLink = jsonData.links.find(link =>
                                 (link.source === sourceNode && link.target === targetNode) ||
                                 (link.source === targetNode && link.target === sourceNode)
                             );
-        
+
                             if (existingLink) {
                                 existingLink.value += l.value;
                             } else {
@@ -58,44 +104,76 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 })
         );
-        
+
         Promise.all(fetchPromises).then(() => {
             const div = d3.select("#content2");
             const svg = d3.select("#content-svg2");
-        
-            createGraph(div, svg, jsonData);
+
+            // Clear previous SVG content
+            svg.selectAll("*").remove();
+
+            if (jsonData.nodes.length > 0) {
+                const episodeMinLinkValue = Math.min(minLinkValue, d3.min(jsonData.links, d => d.value));
+                const episodeMaxLinkValue = Math.max(maxLinkValue, d3.max(jsonData.links, d => d.value));
+    
+                updateSlider(episodeMinLinkValue, episodeMaxLinkValue, fromSlider.vale === fromSlider.min, toSlider.value === toSlider.max);
+    
+                createGraph(div, svg, jsonData);
+            } else {
+                // updateSlider(minLinkValue, maxLinkValue, true);
+            }
         }).catch(err => {
             console.error('Error reading JSON:', err);
         });
     });
 
-    fetch('./starwars-interactions/starwars-full-interactions-allCharacters.json')
-        .then(response => response.json())
-        .then(jsonData => {
-            console.log('JSON data:', jsonData);
-            console.log('nodes:', jsonData.nodes);
+    function updateSlider(minValue, maxValue, setFromValue, setToValue) {
+        fromSlider.min = minValue;
+        fromSlider.max = maxValue;
+        // fromSlider.value = minValue;
 
-            const div = d3.select("#content1");
-            const svg = d3.select("#content-svg1");
+        toSlider.min = minValue;
+        toSlider.max = maxValue;
+        // toSlider.value = maxValue;
 
-            // Create all episode visualization
-            createGraph(div, svg, jsonData);
-        })
-        .catch(err => {
-            console.error('Error reading JSON:', err);
-        });
+        fromInput.min = minValue;
+        fromInput.max = maxValue;
+        // fromInput.value = minValue;
+
+        toInput.min = minValue;
+        toInput.max = maxValue;
+        // toInput.value = maxValue;
+
+        if (setFromValue) {
+            fromSlider.value = minValue;
+            fromInput.value = minValue;
+        }
+
+        if (setToValue) {
+            toSlider.value = maxValue;
+            toInput.value = maxValue;
+        }
+    }
+
+    function updateLinks() {
+        const minVal = parseInt(fromSlider.value);
+        const maxVal = parseInt(toSlider.value);
+    
+        d3.select("#content-svg1").selectAll('line')
+            .style('visibility', function(d) {
+                return (d.value >= minVal && d.value <= maxVal) ? 'visible' : 'hidden';
+            });
+
+        d3.select("#content-svg2").selectAll('line')
+            .style('visibility', function(d) {
+                return (d.value >= minVal && d.value <= maxVal) ? 'visible' : 'hidden';
+            });
+    }
 
     function createGraph(contentDiv, svg, jsonData) {
         const tooltip = d3.select("#tooltip");
 
-        // Clear previous SVG content
-        svg.selectAll("*").remove();
         const { width, height } = contentDiv.node().getBoundingClientRect();
-
-        // Create a new SVG element
-        // const svg = contentDiv.append("svg")
-        //     .attr("width", width) //TODO
-        //     .attr("height", height);
 
         const g = svg.append("g");
 
@@ -126,17 +204,17 @@ document.addEventListener('DOMContentLoaded', () => {
             let link = g.selectAll('line')
                 .data(links)
                 .join('line')
-                .attr('stroke', 'black') // or whatever color you want
+                .attr('stroke', 'black')
                 .attr('stroke-width', d => linkScale(d.value))
                 .attr('x1', d => d.source.x)
                 .attr('y1', d => d.source.y)
                 .attr('x2', d => d.target.x)
                 .attr('y2', d => d.target.y)
-                .attr('class', d => 
+                .attr('class', d =>
                     d.source.name.replace(/[\/\s]+/g, '-') +
                     d.target.name.replace(/[\/\s]+/g, '-') +
                     " " +
-                    d.source.name.replace(/[\/\s]+/g, '-') + 'link' + 
+                    d.source.name.replace(/[\/\s]+/g, '-') + 'link' +
                     " " +
                     d.target.name.replace(/[\/\s]+/g, '-') + 'link'
                 )
@@ -172,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .attr('cy', function (d) {
                     return d.y;
                 })
-                .attr('class', d => 
+                .attr('class', d =>
                     d.name.replace(/[\/\s]+/g, '-')
                 )
                 .on("mouseover", function (event, d) {
@@ -185,22 +263,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         .attr("stroke-width", 3);
 
                     d3.selectAll('.' + d.name.replace(/[\/\s]+/g, '-') + 'link')
-                        .attr("stroke-width", l => linkScale(l.value) * scale)
+                        .attr("stroke-width", function(d) {
+                            return parseFloat(d3.select(this).attr("stroke-width")) * scale;
+                        })
                         .attr("stroke", "red");
                 })
                 .on("mouseout", function (event, d) {
                     tooltip.style("opacity", 0);
-                    
+
                     d3.selectAll('.' + d.name.replace(/[\/\s]+/g, '-')).attr("stroke", null);
 
                     d3.selectAll('.' + d.name.replace(/[\/\s]+/g, '-') + 'link')
-                        .attr("stroke-width", l => linkScale(l.value))
+                        .attr("stroke-width", function(d) {
+                            return parseFloat(d3.select(this).attr("stroke-width")) / scale;
+                        })
                         .attr("stroke", "black");
                 })
                 .call(drag(simulation)
                     .on('start', dragstarted)
                     .on('drag', dragged)
                     .on('end', dragended));
+
+
+            updateLinks();
         }
 
         function dragstarted(event, d) {
